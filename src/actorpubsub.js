@@ -56,13 +56,19 @@
         });
     };
 
-    PubSub.publish = function(eventName) {
+    PubSub.publish = function(eventName, data) {
+        if (!eventRegistry[eventName]) {
+            return false;
+        }
+
         eventRegistry[eventName].send({
             name: 'notify',
-            data: {
-                event: eventName
+            event: {
+                name: eventName,
+                data: data
             }
         });
+        return true;
     };
 
     var Observer = function(listener) {
@@ -70,9 +76,20 @@
     };
 
     Observer.prototype = {
-        send: function(msg) {
+        send: function(msg, data) {
+            var self = this,
+                throwException = function(ex) {
+                    return function reThrowException() {
+                        throw ex;
+                    };
+                };
+
             setTimeout(function() {
-                this.listener(msg);
+                try {
+                    self.listener(msg, data);
+                } catch(ex) {
+                    setTimeout(throwException(ex), 0);
+                }
             }, 0);
         },
         equals: function(observer) {
@@ -87,19 +104,24 @@
         self.next = next;
 
         this.listener = function(msg) {
-            var newNext;
+            var newNext,
+                newSelf,
+                self = this;
 
             switch(msg.name) {
             case 'attach':
-                newNext = self; //new SubjectBeh(observer, next)
-                self = new SubjectBeh(msg.data.observer, newNext);
+                newNext = new SubjectBeh(self.observer, self.next);
+                newSelf = new SubjectBeh(msg.data.observer, newNext);
+                self.observer = newSelf.observer;
+                self.next = newSelf.next;
+                self.listener = newSelf.listener;
                 break;
             case 'notify':
-                observer.send(msg.data.event);
-                next.send(msg);
+                self.observer.send(msg.event.name, msg.event.data);
+                self.next.send(msg);
                 break;
             case 'detach':
-                if (observer.equals(msg.data.observer)) {
+                if (self.observer.equals(msg.data.observer)) {
                     self = new BecomeBeh(self.next, self.next);
                     self.next.send({
                         name: 'prune',
