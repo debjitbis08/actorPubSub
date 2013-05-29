@@ -1,0 +1,44 @@
+{
+    "name": "actorpubsub-js",
+    "version": "0.0.1",
+    "description": "A publish/subscribe library for JavaScript based on Actor Model",
+    "main": "./src/actorpubsub.js",
+    "directories": {
+        "lib": "src",
+        "test": "test"
+    },
+
+    "scripts": {
+        "test": "grunt test"
+    },
+
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/debjitbis08/actorPubSub"
+    },
+
+    "keywords": [
+        "pub/sub",
+        "pubsub",
+        "publish/subscribe",
+        "publish",
+        "subscribe",
+        "actors"
+    ],
+
+    "author": {
+        "name": "Debjit Biswas",
+        "email": "debjitbis08@gmail.com",
+        "url": "http://www.debjitbiswas.com"
+    },
+
+    "license": "MIT",
+
+    "devDependencies": {
+        "grunt": "~0.4.1",
+        "mocha": "~1.10.0",
+        "grunt-mocha": "~0.3.2",
+        "grunt-contrib-jshint": "~0.4.1",
+        "chai": "~1.6.0"
+    }
+}

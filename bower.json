@@ -1,0 +1,9 @@
+{
+  "name": "actorPubSub",
+  "version": "0.0.1",
+  "main": "src/actorpubsub.js",
+  "ignore": [
+    "**/.*",
+    "package.json"
+  ]
+}
