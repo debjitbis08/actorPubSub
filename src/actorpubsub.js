@@ -46,10 +46,6 @@
     };
 
     PubSub.unsubscribe = function(eventName, listener) {
-        /*
-         * TODO: This will not work because we are creating a different
-         * observer object than the one used during 'on'.
-         */
         var observer = new Observer(listener);
 
         eventRegistry[eventName].send({
@@ -111,6 +107,8 @@
                             prev: self
                         }
                     });
+                } else {
+                    self.next.send(msg);
                 }
                 break;
             case 'prune':
@@ -158,6 +156,8 @@
             case 'become':
                 if (auth.equals(msg.data.auth)) {
                     self = msg.data.beh;
+                } else {
+                    delegate.send(msg);
                 }
                 break;
             default:
