@@ -33,7 +33,7 @@ window
         }
         getUniqueString.uid++;
 
-        return "my unique String number " + getUniqueString.uid.toString();
+        return 'my unique String number ' + getUniqueString.uid.toString();
     }
 
     // makes sure that all tokens in the passed array are different

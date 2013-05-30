@@ -1,7 +1,8 @@
 /*global
     describe,
     expect,
-    it
+    it,
+    TestHelper
 */
 (function(global) {
     'use strict';
@@ -62,10 +63,10 @@
                     counter1 = 0,
                     counter2 = 0,
                     spy1 = function() {
-                        counter1 += 1;                        
+                        counter1 += 1;
                     },
                     spy2 = function() {
-                        counter2 += 1;                        
+                        counter2 += 1;
                     };
 
                 PubSub.subscribe(message2, spy2);
@@ -109,7 +110,7 @@
                     counter1 = 0,
                     counter2 = 0,
                     func1 = function() {
-                        throw ('some error');
+                        throw new Error('some error');
                     },
                     spy1 = function() {
                         counter1 += 1;
@@ -118,20 +119,21 @@
                         counter2 += 1;
                     };
 
-                PubSub.subscribe(message, spy1);                
+                PubSub.subscribe(message, spy1);
                 PubSub.subscribe(message, func1);
                 PubSub.subscribe(message, spy2);
 
                 PubSub.publish(message);
 
-                expect(func1).to.throw('some error');
-
-                setTimeout(function() {
-                    expect(func1).to.throw('some error');
-                    expect(counter1).to.equal(1);
-                    expect(counter2).to.equal(1);
-                    done();
-                }, 1900);
+                global.onerror = function(e) {
+                    setTimeout(function() {
+                        expect(e).to.equal('Error: some error');
+                        expect(counter1).to.equal(1);
+                        expect(counter2).to.equal(1);
+                        global.onerror = null;
+                        done();
+                    }, 1900);
+                };
             });
         });
 
