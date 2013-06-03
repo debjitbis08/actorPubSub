@@ -72,11 +72,25 @@
         return true;
     };
 
+    /*
+     * The base class for all behaviors.
+     * 
+     * @class
+     * @constructor
+     * @private
+     */
     var Observer = function(listener) {
         this.listener = listener;
     };
 
     Observer.prototype = {
+        /*
+         * Send a message to this observer.
+         * 
+         * @method
+         * @param {Object} msg
+         * @param {Object} data
+         */
         send: function(msg, data) {
             var self = this,
                 throwException = function(ex) {
@@ -92,9 +106,6 @@
                     setTimeout(throwException(ex), 0);
                 }
             }, 0);
-        },
-        equals: function(observer) {
-            return observer.listener === this.listener;
         }
     };
 
