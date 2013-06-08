@@ -109,6 +109,26 @@
         }
     };
 
+    var Actor = function() {
+        var act = this;
+
+        act._beh = new Beh();
+        act.addr = new Observer(function(msg) {
+            act._beh.respond.apply(msg, Array.prototype.slice(arguments, 1));
+        });
+    };
+
+    var Beh = function(responses) {
+        var self = this;
+
+        self.responses = responses;
+    };
+    Beh.prototype = {
+        respond: function(stimulus) {
+            self.responses[stimulus].apply(null, Array.prototype.slice(arguments, 1));
+        }
+    };
+
     var SubjectBeh = function(observer, token, next) {
         var self = this;
 
