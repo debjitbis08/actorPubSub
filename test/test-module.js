@@ -54,7 +54,7 @@
                     expect(counter1).to.equal(1);
                     expect(counter2).to.equal(1);
                     done();
-                }, 1900);
+                }, 1000);
             });
 
             it('publish method should call ONLY subscribers of the published message', function(done) {
@@ -132,7 +132,7 @@
                         expect(counter2).to.equal(1);
                         global.onerror = null;
                         done();
-                    }, 1900);
+                    }, 100);
                 };
             });
         });

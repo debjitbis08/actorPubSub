@@ -25,7 +25,7 @@ window
 
     var TestHelper = {};
 
-    // helps us make sure that the order of the tests have no impact on their succes
+    // helps us make sure that the order of the tests have no impact on their success
 
     function getUniqueString() {
         if (getUniqueString.uid === undefined) {
