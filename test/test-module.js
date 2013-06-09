@@ -246,5 +246,24 @@
                 }, 1000);
             });
         });
+
+        it('should not allow subscribers to change the data passed to them with the events', function(done) {
+            var message = TestHelper.getUniqueString(),
+                data = {
+                    id: 1,
+                    name: 'Data String'
+                },
+                spy = function(msg, payload) {
+                    payload.id = 2;
+                };
+
+            PubSub.subscribe(message, spy);
+            PubSub.publish(message, data);
+
+            setTimeout(function() {
+                expect(data.id).to.equal(1);
+                done();
+            }, 1000)
+        });
     });
 }(this));
