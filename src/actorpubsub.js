@@ -24,54 +24,6 @@
 }((typeof window === 'object' && window) || this, function() {
     'use strict';
 
-    var PubSub = {
-        name: 'ActorPubSub',
-        version: '0.0.1'
-    };
-    var eventRegistry = {},
-        lastUid = -1;
-
-    PubSub.subscribe = function(eventName, listener) {
-        var observer = new Observer(listener),
-            token = (++lastUid).toString();
-
-        if(eventRegistry[eventName]) {
-            eventRegistry[eventName].send({
-                name: 'attach',
-                data: {
-                    observer: observer,
-                    token: token
-                }
-            });
-        } else {
-            eventRegistry[eventName] = new SubjectBeh(observer, token, EmptySubjectBeh);
-        }
-    };
-
-    PubSub.unsubscribe = function(eventName, token) {
-        eventRegistry[eventName].send({
-            name: 'detach',
-            data: {
-                token: token
-            }
-        });
-    };
-
-    PubSub.publish = function(eventName, data) {
-        if (!eventRegistry[eventName]) {
-            return false;
-        }
-
-        eventRegistry[eventName].send({
-            name: 'notify',
-            event: {
-                name: eventName,
-                data: data
-            }
-        });
-        return true;
-    };
-
     /*
      * The base class for all behaviors.
      * 
@@ -89,10 +41,10 @@
          * 
          * @method
          * @param {Object} msg
-         * @param {Object} data
          */
-        send: function(msg, data) {
+        send: function() {
             var self = this,
+                args = Array.prototype.slice.call(arguments, 0),
                 throwException = function(ex) {
                     return function reThrowException() {
                         throw ex;
@@ -101,21 +53,12 @@
 
             setTimeout(function() {
                 try {
-                    self.listener(msg, data);
+                    self.listener.apply(self, args);
                 } catch(ex) {
                     setTimeout(throwException(ex), 0);
                 }
             }, 0);
         }
-    };
-
-    var Actor = function() {
-        var act = this;
-
-        act._beh = new Beh();
-        act.addr = new Observer(function(msg) {
-            act._beh.respond.apply(msg, Array.prototype.slice(arguments, 1));
-        });
     };
 
     var Beh = function(responses) {
@@ -124,8 +67,14 @@
         self.responses = responses;
     };
     Beh.prototype = {
-        respond: function(stimulus) {
-            self.responses[stimulus].apply(null, Array.prototype.slice(arguments, 1));
+        respond: function(act, stimulus) {
+            var self = this;
+
+            if (self.responses[stimulus]) {
+                self.responses[stimulus].apply(act, Array.prototype.slice.call(arguments, 2));
+            } else if (self.responses['*']) {
+                self.responses['*'].apply(act, Array.prototype.slice.call(arguments, 2));
+            }
         }
     };
 
@@ -133,94 +82,157 @@
         var self = this;
 
         self.observer = observer;
-        self.next = next;
         self.token = token;
-    };
+        self.next = next;
 
-    SubjectBeh.prototype = Object.create(Observer.prototype);
-    SubjectBeh.prototype.listener = function(msg) {
-        var newNext,
-            newSelf,
-            self = this;
+        self.responses = {
+            'attach': function(observer, token) {
+                var act = this,
+                    newSubjectActor;
 
-        switch(msg.name) {
-        case 'attach':
-            newNext = new SubjectBeh(self.observer, self.token, self.next);
-            newSelf = new SubjectBeh(msg.data.observer, msg.data.token, newNext);
-            self.observer = newSelf.observer;
-            self.next = newSelf.next;
-            self.listener = newSelf.listener;
-            break;
-        case 'notify':
-            self.observer.send(msg.event.name, msg.event.data);
-            self.next.send(msg);
-            break;
-        case 'detach':
-            if (self.token === msg.data.token) {
-                self = new BecomeBeh(self.next.token, self.next);
-                self.next.send({
-                    name: 'prune',
-                    data: {
-                        prev: self
-                    }
-                });
-            } else {
-                self.next.send(msg);
+                newSubjectActor = new Actor(self);
+                act._beh = new SubjectBeh(observer, token, newSubjectActor);
+            },
+            'notify': function(event) {
+                var act = this;
+
+                self.observer.send(event.name, event.data);
+                self.next.send('notify', event);
+            },
+            'detach': function(token) {
+                var act = this;
+
+                if (act.token === token) {
+                    act._beh = new BecomeBeh(self.next, act.next);
+                    act.next.send('prune', act);
+                } else {
+                    act.next.send('detach', token);
+                }
+            },
+            'prune': function(prev) {
+                var act = this;
+
+                prev.send('become', act, self);
+            },
+            '*': function() {
+                self.next.send.apply(self.next, Array.prototype.slice.call(arguments, 0));
             }
-            break;
-        case 'prune':
-            msg.data.prev.send({
-                name: 'become',
-                data: {
-                    auth: self.token,
-                    beh: self //new SubjectBeh(observer, next)
-                }
-            });
-            break;
-        default:
-            self.next.send(msg);
         }
     };
-
-    var EmptySubjectBeh = new Observer(function(msg) {
-        var self = this,
-            newNext;
-
-        switch(msg.name) {
-        case 'attach':
-            newNext = self; //new SubjectBeh(observer, next)
-            self = new SubjectBeh(msg.data.observer, msg.data.token, newNext);
-            break;
-        case 'prune':
-            msg.data.prev.send({
-                name: 'become',
-                data: {
-                    auth: self.token,
-                    beh: self
-                }
-            });
-        }
-    });
+    SubjectBeh.prototype = Object.create(Beh.prototype);
 
     var BecomeBeh = function(auth, delegate) {
         var self = this;
 
-        self.listener = function(msg) {
-            switch(msg) {
-            case 'become':
-                if (auth.equals(msg.data.auth)) {
-                    self = msg.data.beh;
+        self.auth = auth;
+        self.delegate = delegate;
+
+        self.responses = {
+            'become': function(auth, beh) {
+                var act = this;
+
+                if (self.auth === auth) {
+                    act._beh = beh;
                 } else {
-                    delegate.send(msg);
+                    delegate.send('become', auth, beh);
                 }
-                break;
-            default:
-                delegate.send(msg);
+            },
+            '*': function(msg) {
+                delegate.send.apply(delegate, Array.prototype.slice.call(arguments, 0));
             }
         };
     };
+    BecomeBeh.prototype = Object.create(Beh.prototype);
 
-    BecomeBeh.prototype = Object.create(Observer.prototype);
+    var EmptySubjectBeh = function() {
+        var self = this;
+        
+        self.token = -1;
 
+        self.responses = {
+            'attach': function(observer, token) {
+                var act = this;
+
+                newSubjectActor = new Actor(self);
+                act._beh = new SubjectBeh(observer, token, newSubjectActor);
+            },
+            'prune': function(prev) {
+                var act = this;
+
+                prev.send('become', act, self);
+            },
+            '*': function() {}
+        };
+    };
+    EmptySubjectBeh.prototype = Object.create(Beh.prototype);
+
+
+    var Actor = function(responses) {
+        var act = this;
+
+        if (responses instanceof Beh) {
+            act._beh = responses;
+        } else {
+            act._beh = new Beh(responses);
+        }
+    };
+    Actor.prototype = Object.create(Observer.prototype);
+
+    Actor.prototype.listener = function() {
+        var act = this,
+            args = Array.prototype.slice.call(arguments, 0);
+
+        args.unshift(act);
+
+        act._beh.respond.apply(act._beh, args);
+    };
+
+    var SubjectActor = function(observer, token, next) {
+        var act = this;
+
+        act._beh = new SubjectBeh(observer, token, next);
+    };
+    SubjectActor.prototype = Object.create(Actor.prototype);
+
+
+
+    var PubSub = {
+        name: 'ActorPubSub',
+        version: '0.0.1'
+    };
+    var eventRegistry = {},
+        lastUid = -1;
+
+    PubSub.subscribe = function(eventName, listener) {
+        var observer = new Observer(listener),
+            token = (++lastUid).toString();
+
+        if(eventRegistry[eventName]) {
+            eventRegistry[eventName].send('attach', observer, token);
+        } else {
+            eventRegistry[eventName] = new SubjectActor(
+                observer, token,
+                new Actor(new EmptySubjectBeh()));
+        }
+    };
+
+    PubSub.unsubscribe = function(eventName, token) {
+        eventRegistry[eventName].send('detach', token);
+    };
+
+    PubSub.publish = function(eventName, data) {
+        if (!eventRegistry[eventName]) {
+            return false;
+        }
+
+        eventRegistry[eventName].send('notify',
+            {
+                name: eventName,
+                data: data
+            }
+        );
+        return true;
+    };
+    
     return PubSub;
 }));
