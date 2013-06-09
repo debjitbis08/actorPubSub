@@ -35,7 +35,7 @@
     "license": "MIT",
 
     "devDependencies": {
-        "grunt": "~0.4.1",
+        "grunt-cli": "~0.1.0",
         "mocha": "~1.10.0",
         "grunt-mocha": "~0.3.2",
         "grunt-contrib-jshint": "~0.4.1",
