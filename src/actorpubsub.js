@@ -24,6 +24,33 @@
 }((typeof window === 'object' && window) || this, function() {
     'use strict';
 
+    var copy = function(parent, child) {
+        var i,
+            toStr = Object.prototype.toString,
+            astr = '[object Array]';
+
+        if (typeof parent === 'string' ||
+            typeof parent === 'number' ||
+            typeof parent === 'boolean') {
+            return parent;
+        }
+
+        child = child || {};
+
+        for(i in parent) {
+            if(parent.hasOwnProperty(i)) {
+                if(typeof parent[i] === 'object') {
+                    child[i] = (toStr.call(parent[i]) === astr) ? [] : {};
+                    copy(parent[i], child[i]);
+                } else {
+                    child[i] = parent[i];
+                }
+            }
+        }
+
+        return child;
+    };
+
     /*
      * The base class for all behaviors.
      * 
@@ -94,7 +121,7 @@
                 act._beh = new SubjectBeh(observer, token, newSubjectActor);
             },
             'notify': function(event) {
-                self.observer.send(event.name, event.data);
+                self.observer.send(event.name, copy(event.data));
                 self.next.send('notify', event);
             },
             'detach': function(token) {

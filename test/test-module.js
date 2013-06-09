@@ -262,6 +262,7 @@
 
             setTimeout(function() {
                 expect(data.id).to.equal(1);
+                expect(data.name).to.equal('Data String');
                 done();
             }, 1000)
         });
