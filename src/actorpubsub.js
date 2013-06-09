@@ -94,8 +94,6 @@
                 act._beh = new SubjectBeh(observer, token, newSubjectActor);
             },
             'notify': function(event) {
-                var act = this;
-
                 self.observer.send(event.name, event.data);
                 self.next.send('notify', event);
             },
@@ -117,7 +115,7 @@
             '*': function() {
                 self.next.send.apply(self.next, Array.prototype.slice.call(arguments, 0));
             }
-        }
+        };
     };
     SubjectBeh.prototype = Object.create(Beh.prototype);
 
@@ -137,7 +135,7 @@
                     delegate.send('become', auth, beh);
                 }
             },
-            '*': function(msg) {
+            '*': function() {
                 delegate.send.apply(delegate, Array.prototype.slice.call(arguments, 0));
             }
         };
@@ -146,12 +144,13 @@
 
     var EmptySubjectBeh = function() {
         var self = this;
-        
+
         self.token = -1;
 
         self.responses = {
             'attach': function(observer, token) {
-                var act = this;
+                var act = this,
+                    newSubjectActor;
 
                 newSubjectActor = new Actor(self);
                 act._beh = new SubjectBeh(observer, token, newSubjectActor);
@@ -235,6 +234,6 @@
         );
         return true;
     };
-    
+
     return PubSub;
 }));
