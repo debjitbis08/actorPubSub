@@ -141,8 +141,110 @@
             expect(PubSub.subscribe).to.be.a('function');
         });
 
+        describe('#subscribe()', function() {
+            it('should return token as a String', function(){
+                var func = function(){},
+                    message = TestHelper.getUniqueString(),
+                    token = PubSub.subscribe( message , func );
+
+                expect(token).to.be.a('string');
+            });
+
+            it('should return new token for several subscriptions with same function', function() {
+                var func = function() {},
+                    tokens = [],
+                    iterations = 10,
+                    message = TestHelper.getUniqueString(),
+                    i;
+
+                // build an array of tokens
+                for (i = 0; i < iterations; i++) {
+                    tokens.push(PubSub.subscribe(message, func));
+                }
+                // make sure all tokens are different
+                TestHelper.assertAllTokensDifferent(tokens);
+            });
+
+            it('should return unique token for unique functions', function() {
+                var tokens = [],
+                    iterations = 10,
+                    message = TestHelper.getUniqueString(),
+                    i;
+
+                function bakeFunc(value) {
+                    return function() {
+                        return value;
+                    };
+                }
+
+                // build an array of tokens, passing in a different function for each subscription
+                for (i = 0; i < iterations; i++) {
+                    tokens.push(PubSub.subscribe(message, bakeFunc(i)));
+                }
+
+                // make sure all tokens are different
+                TestHelper.assertAllTokensDifferent(tokens);
+            });
+        });
+
         it('should have a method unsubscribe', function() {
             expect(PubSub.unsubscribe).to.be.a('function');
+        });
+
+        describe('#unsubscribe()', function() {
+            /*
+            it('should return token when succesful', function() {
+                var func = function() {},
+                    message = TestHelper.getUniqueString(),
+                    token = PubSub.subscribe(message, func),
+                    result = PubSub.unsubscribe(token);
+
+                expect(result).to.equal(token);
+            });
+
+            it('should return false when unsuccesful', function() {
+                var unknownToken = 'my unknown token',
+                    result = PubSub.unsubscribe(unknownToken),
+                    func = function() {},
+                    message = TestHelper.getUniqueString(),
+                    token = PubSub.subscribe(message, func);
+
+                // first, let's try a completely unknown token
+                expect(result).to.equal(false);
+
+                // now let's try unsubscribing the same method twice
+                PubSub.unsubscribe(token);
+                expect(PubSub.unsubscribe(token)).to.equal(false);
+            });
+            */
+
+            it('should unsubscribe a function previously subscribed', function(done) {
+                var message = TestHelper.getUniqueString(),
+                    counter1 = 0,
+                    counter2 = 0,
+                    token1,
+                    token2,
+                    spy1 = function() {
+                        counter1 += 1;
+                    },
+                    spy2 = function() {
+                        counter2 += 1;
+                    };
+
+                token1 = PubSub.subscribe(message, spy1);
+                token2 = PubSub.subscribe(message, spy2);
+
+                PubSub.unsubscribe(message, token1);
+
+                PubSub.publish(message);
+
+                //TODO: Is there a better method?
+                setTimeout(function() {
+                    expect(counter1).to.equal(0);
+                    expect(counter2).to.equal(1);
+                    done();
+                }, 1000);
+            });
         });
     });
 }(this));

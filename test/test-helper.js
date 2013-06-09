@@ -41,17 +41,19 @@ window
     function assertAllTokensDifferent(tokens) {
         var length = tokens.length,
             j, k;
-        assert(tokens.length > 0);
+
+        expect(tokens).to.have.length.above(0);
+
         // compare all tokens
         for (j = 0; j < length; j++) {
             for (k = j + 1; k < length; k++) {
-                assert(tokens[j] !== tokens[k]);
+                expect(tokens[j]).to.not.equal(tokens[k]);
             }
         }
 
         // make sure we actually tested something
-        assert.equals(j, length);
-        assert.equals(k, length);
+        expect(j).to.equal(length);
+        expect(k).to.equal(length);
     }
 
     TestHelper.getUniqueString = getUniqueString;

@@ -102,11 +102,11 @@
             'detach': function(token) {
                 var act = this;
 
-                if (act.token === token) {
-                    act._beh = new BecomeBeh(self.next, act.next);
-                    act.next.send('prune', act);
+                if (self.token === token) {
+                    act._beh = new BecomeBeh(self.next, self.next);
+                    self.next.send('prune', act);
                 } else {
-                    act.next.send('detach', token);
+                    self.next.send('detach', token);
                 }
             },
             'prune': function(prev) {
@@ -214,6 +214,8 @@
                 observer, token,
                 new Actor(new EmptySubjectBeh()));
         }
+
+        return token;
     };
 
     PubSub.unsubscribe = function(eventName, token) {
