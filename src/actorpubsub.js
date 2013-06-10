@@ -224,7 +224,7 @@
 
     var PubSub = {
         name: 'ActorPubSub',
-        version: '0.0.1'
+        version: '0.1.21'
     };
     var eventRegistry = {},
         lastUid = -1;
