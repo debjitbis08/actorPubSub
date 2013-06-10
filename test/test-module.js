@@ -8,7 +8,7 @@
     'use strict';
 
     var PubSub = global.PubSub || require('../src/actorpubsub'),
-        EXPECTED_VERSION = '0.0.1';
+        EXPECTED_VERSION = '0.1.21';
 
     describe('ActorPubSub', function() {
         it('should report version correctly', function() {

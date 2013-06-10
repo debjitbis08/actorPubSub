@@ -1,6 +1,6 @@
 {
     "name": "actorpubsub-js",
-    "version": "0.0.1",
+    "version": "0.1.21",
     "description": "A publish/subscribe library for JavaScript based on Actor Model",
     "main": "./src/actorpubsub.js",
     "directories": {
