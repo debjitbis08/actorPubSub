@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Actor PubSub : A publish/subscribe library for JavaScript based on Actor Model." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Actor PubSub</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/debjitbis08/actorPubSub">View on GitHub</a>
+
+          <h1 id="project_title">Actor PubSub</h1>
+          <h2 id="project_tagline">A publish/subscribe library for JavaScript based on Actor Model.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/debjitbis08/actorPubSub/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/debjitbis08/actorPubSub/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="actorpubsub-" class="anchor" href="#actorpubsub-"><span class="octicon octicon-link"></span></a>ActorPubSub <a href="https://travis-ci.org/debjitbis08/actorPubSub"><img src="https://travis-ci.org/debjitbis08/actorPubSub.png?branch=master" alt="Build Status"></a>
+</h1>
+
+<p>ActorPubSub is a dependency free publish/subscribe library for JavaScript based on the Actor Model. It takes a lot of 
+inspiration from <a href="https://github.com/mroderick/PubSubJS">PubSubJS</a> and uses the ideas from 
+<a href="http://www.dalnefre.com/wp/2011/05/actors-make-better-observers/">Actors Make Better Observers</a> to implement the 
+required actors. It can be used as a normal pub/sub library as all the actor logic is hidden away.</p>
+
+<p>A major benefit of this implementation is that no observer list updates block the notification process.</p>
+
+<h2>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h2>
+
+<ul>
+<li>Dependency free.</li>
+<li>Synchronization decoupling.</li>
+<li>Attaching and detaching subscribers is also asynchronous.</li>
+<li>Since observer list updates are asynchronous, notify operations are possible while updates are in progress.</li>
+<li>Data passed to subscribers is a copy of the original data, thus, changes to it by the subscribers does not 
+affect other subscribers and the publisher.</li>
+</ul>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Actor PubSub maintained by <a href="https://github.com/debjitbis08">debjitbis08</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
