@@ -4,6 +4,8 @@
   "main": "src/actorpubsub.js",
   "ignore": [
     "**/.*",
+    "test",
+    "Gruntfile.js",
     "package.json"
   ]
 }
