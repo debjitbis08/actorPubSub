@@ -33,26 +33,14 @@ PubSub.publish('Topic', 'ahoy!');
 ```javascript
 // create a function to receive the topic
 var mySubscriber = function( msg, data ){
-    console.log( msg, data );
+    console.log(msg, data);
 };
 
 // add the function to the list of subscribers to a particular topic
 // we're keeping the returned token, in order to be able to unsubscribe
 // from the topic later on
-var token = PubSub.subscribe( 'MY TOPIC', mySubscriber );
+var token = PubSub.subscribe('MY TOPIC', mySubscriber);
 
 // unsubscribe this subscriber from this topic
-PubSub.unsubscribe( token );
-```
-
-### Cancel all subscriptions for a function
-
-```javascript
-// create a function to receive the topic
-var mySubscriber = function( msg, data ){
-    console.log( msg, data );
-};
-
-// unsubscribe mySubscriber from ALL topics
-PubSub.unsubscribe( mySubscriber );
+PubSub.unsubscribe('MY TOPIC', token);
 ```
